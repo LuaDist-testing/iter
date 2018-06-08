@@ -8,13 +8,13 @@ Expected: %s
 Got: %s]]
 
 local function expect(x, y, msg)
-  assert(x == y, string.format(MSG_TEMPLATE, msg or "", y or "", x or ""))
+  assert(x == y, string.format(MSG_TEMPLATE, msg or "", y, x))
   print(msg)
 end
 
 do
   local values = iter.values(ten)
-  expect(values(), 1, "values iterates over values")
+  assert(values() == 1, "values iterates over values")
 end
 
 do
@@ -70,23 +70,9 @@ end
 
 do
   local x = iter.values(ten)
-  local y = iter.take_while(function(x) return x < 4 end, x)
-  local t = iter.collect(y)
-  expect(#t, 3, "take_while(f, iter) takes correct number of values")
-end
-
-do
-  local x = iter.values(ten)
   local y = iter.skip(3, x)
   local t = iter.collect(y)
   expect(#t, 7, "skip(n, iter) skips corrrect number of values")
-end
-
-do
-  local x = iter.values(ten)
-  local y = iter.skip_while(function(x) return x < 4 end, x)
-  local t = iter.collect(y)
-  expect(#t, 6, "skip_while(f, iter) skips correct number of values")
 end
 
 do
@@ -152,23 +138,4 @@ do
   local y = iter.ivalues({1, 2, 3, 4, 5})
   local o = iter.find(function (x) return x == 10 end, x)
   expect(o, nil, "find(f, iter) returns nil when nothing passes")
-end
-
-do
-  local x = iter.ivalues(ten)
-  local chunks = iter.partition(3, x)
-  local y = iter.collect(chunks)
-  expect(#y, 4, "partition(n, iter) creates correct number of chunks")
-  expect(#y[1], 3, "partition(n, iter) creates correct chunk sizes")
-  expect(#y[4], 1, "partition(n, iter) appends leftovers to last chunk")
-end
-
-do
-  local x = iter.ivalues({1, 2, 2, 2, 3, 3, 4, 4, 4, 4, 4, 3, 3})
-  local chunks = iter.dedupe(x)
-  local y = iter.collect(chunks)
-  expect(#y, 5, "dedupe(iter) compacts iter to adjacent unique")
-  expect(y[3], 3, "dedupe(iter) dedupes correctly")
-  expect(y[4], 4, "dedupe(iter) dedupes correctly")
-  expect(y[5], 3, "dedupe(iter) only dedupes adjacent")
 end

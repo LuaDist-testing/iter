@@ -1,16 +1,8 @@
--- This file was automatically generated for the LuaDist project.
-
 package = "iter"
 version = "0.0-0"
--- LuaDist source
 source = {
-  tag = "0.0-0",
-  url = "git://github.com/LuaDist-testing/iter.git"
+  url = "git://github.com/gordonbrander/iter"
 }
--- Original source
--- source = {
---   url = "git://github.com/gordonbrander/iter"
--- }
 description = {
   summary = "Map, filter and transform iterator functions",
   detailed = [[

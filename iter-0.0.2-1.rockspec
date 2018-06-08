@@ -1,8 +1,17 @@
+-- This file was automatically generated for the LuaDist project.
+
 package = "iter"
-version = "0.0-0"
+version = "0.0.2-1"
+-- LuaDist source
 source = {
-  url = "git://github.com/gordonbrander/iter"
+  tag = "0.0.2-1",
+  url = "git://github.com/LuaDist-testing/iter.git"
 }
+-- Original source
+-- source = {
+--    url = "git://github.com/gordonbrander/iter",
+--    tag = "0.0.2"
+-- }
 description = {
   summary = "Map, filter and transform iterator functions",
   detailed = [[
@@ -17,6 +26,6 @@ dependencies = {
 build = {
   type = "builtin",
   modules = {
-    ["iter"] = "iter.lua"
+    iter = "iter.lua"
   }
 }

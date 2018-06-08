@@ -17,16 +17,22 @@ local exports = {}
 -- Create the metatable we use for `iter_values` below.
 local _iter_values_of = {}
 function _iter_values_of.__call(self)
-  local i, v = self.next(self.state, self.i)
-  self.i = i
-  return v
+  if not self.is_exhausted then
+    local i, v = self.next(self.state, self.i)
+    if not i then
+      self.is_exhausted = true
+    else
+      self.i = i
+      return v
+    end
+  end
 end
 
 -- Capture the state of a stateless iterator and return a stateful iterator
 -- which will only return values. This is a lower-level function. You'll
 -- typically want to use `ivalues` or `values` instead.
 local function iter_values_of(next, state, i)
-  local iter = {next=next, state=state, i=i}
+  local iter = {next=next, state=state, i=i, is_exhausted=false}
   return setmetatable(iter, _iter_values_of)
 end
 exports.iter_values_of = iter_values_of
@@ -212,14 +218,14 @@ local function take_while(predicate, next)
   return function()
     for v in next do
       if predicate(v) then
-        return a2b(v)
+        return v
       else
         return nil
       end
     end
   end
 end
-exports.map = map
+exports.take_while = take_while
 
 -- Skip the first `n` items of iterator.
 -- Returns a new iterator that will yield items after skipping `n` items.
@@ -249,6 +255,7 @@ local function skip_while(predicate, next)
     end
   end
 end
+exports.skip_while = skip_while
 
 -- Partition an iterator into "chunks", returning an iterator of tables
 -- containing `chunk_size` items each.
@@ -256,19 +263,16 @@ end
 local function partition(chunk_size, next)
   return function()
     local chunk = {}
-
     for v in next do
       table.insert(chunk, v)
       if #chunk == chunk_size then
         return chunk
       end
     end
-
     -- If we have any values in the last chunk, return it.
     if #chunk > 0 then
       return chunk
     end
-
     -- Otherwise, return nothing
   end
 end
@@ -306,20 +310,6 @@ local function zip(next_a, next_b)
 end
 exports.zip = zip
 
--- Remove adjacent duplicates from iterator.
-local function dedupe(next)
-  local prev = dedupe
-  return function()
-    for curr in next do
-      if curr ~= prev then
-        prev = curr
-        return curr
-      end
-    end
-  end
-end
-exports.dedupe = dedupe
-
 -- Remove adjacent duplicates from iterator. Values are compared with `compare`
 -- function. Function gets previous and current value. If it returns true, the
 -- pair is not considered to be a duplicate.
@@ -335,6 +325,16 @@ local function dedupe_with(compare, next)
   end
 end
 exports.dedupe_with = dedupe_with
+
+local function different(x, y)
+  return x ~= y
+end
+
+-- Remove adjacent duplicates from iterator.
+local function dedupe(next)
+  return dedupe_with(different, next)
+end
+exports.dedupe = dedupe
 
 -- ## Reduce Iterators
 --
